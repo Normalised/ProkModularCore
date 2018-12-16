@@ -17,7 +17,7 @@ public class HiHatModel implements ProkModel {
 
         config.filename = "hihat";
         config.hello = "hihat";
-        config.version = 5;
+        config.version = 6;
 
         return config;
     }

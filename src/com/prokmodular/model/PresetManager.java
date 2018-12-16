@@ -9,7 +9,6 @@ import java.util.List;
 
 public class PresetManager {
     private ArrayList<File> presetFiles;
-    private File modelDir;
     private ProkModel model;
     private PresetReader reader;
     private PresetWriter writer;
@@ -22,20 +21,18 @@ public class PresetManager {
 
     }
 
-    public void setCurrentModel(ProkModel currentModel, File modelDir) {
+    public void setCurrentModel(ProkModel currentModel) {
         if(model == currentModel) return;
         model = currentModel;
-        this.modelDir = modelDir;
         presetFiles.clear();
 
         //println("Set Current Model " + currentModel.getConfig().getName());
     }
 
-    public List<File> listFiles() {
-
+    public List<File> listFilesFrom(File path) {
         if(model == null) return presetFiles;
 
-        File[] files = modelDir.listFiles((dir, name) -> name.toLowerCase().endsWith("prk"));
+        File[] files = path.listFiles((dir, name) -> name.toLowerCase().endsWith("prk"));
 
         presetFiles.clear();
 
@@ -55,7 +52,6 @@ public class PresetManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        listFiles();
     }
 
     public Preset readPreset(File presetFile) throws Exception {

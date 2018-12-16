@@ -28,7 +28,11 @@ public class PatchDefinition {
         }
     }
 
-    public Float getDefaultValueFor(String name) {
+    public Float getDefaultValueFor(String name) throws Exception {
+        if(!paramMap.containsKey(name)) {
+            System.out.println("Param map doesn't have " + name);
+            throw new Exception("Param not found " + name);
+        }
         return paramMap.get(name).defaultValue;
     }
 

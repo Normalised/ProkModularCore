@@ -57,7 +57,7 @@ public class SerialCommunicator {
         modelParamListeners = new ArrayList<>();
     }
 
-    public void init() {
+    public void init(boolean useExternalUpdate) {
         // List all the available serial ports:
 
         portNames = Serial.list();
@@ -65,21 +65,24 @@ public class SerialCommunicator {
         // Open the port you are using at the rate you want:
         if (portNames.length > 0) {
             currentPortIndex = 0;
-            updateTimer = new Timer();
-            updateTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    update();
-                }
-            }, 20);
+            if(!useExternalUpdate) {
+                updateTimer = new Timer();
+                updateTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        update();
+                    }
+                }, 20);
+            }
             testPort();
         } else {
             System.out.println("No serial ports found.. waiting");
+            if(updateTimer != null) updateTimer.cancel();
             connectTimer = new Timer();
             connectTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    init();
+                    init(false);
                 }
             }, 1000);
         }
@@ -100,10 +103,11 @@ public class SerialCommunicator {
             @Override
             public void run() {
                 sendCommand(keepAliveCommand, "");
-                //println("Sending keep alive");
+                System.out.println("Sending keep alive. Count is " + keepAliveCount);
                 keepAliveCount++;
                 if (keepAliveCount > MAX_KEEP_ALIVE_FAIL_COUNT) {
                     System.out.println("Max Keep alives missed. Disconnected");
+//                    System.out.println("Serial buffer is:" + serialBuffer + ".");
                     keepAliveTimer.cancel();
                     connected = false;
                     sendDisconnect();
@@ -164,7 +168,7 @@ public class SerialCommunicator {
     private void processSerial(String serialBuffer) {
         serialBuffer = serialBuffer.trim();
 
-        //System.out.println("Process serial:" + serialBuffer + ":" + state);
+        System.out.println("Process serial:" + serialBuffer + ":" + state);
 
         if (!connected && serialBuffer.startsWith(helloResponse)) {
             String helloType = serialBuffer.substring(helloResponse.length());

@@ -5,7 +5,7 @@ import com.prokmodular.ui.ModelUIBuilder;
 
 public class KickUI implements ModelUI {
     @Override
-    public void createUI(ModelUIBuilder ui) {
+    public void createUI(ModelUIBuilder ui, int version) {
         ui.addSineWithEnvelope("Sine A");
 
         ui.addSpace();
@@ -39,7 +39,7 @@ public class KickUI implements ModelUI {
         ui.nextColumn();
 
         ui.addBiquad("OSC", 50, 6500);
-        ui.addSlider("OSC Distort", 1, 100);
+        ui.addSlider("OSC Distort", 0, 100);
 
         ui.addSpace();
 

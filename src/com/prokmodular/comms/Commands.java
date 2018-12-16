@@ -21,5 +21,6 @@ public class Commands {
 
     public static final String AUDIO_MEMORY = "audiomem";
     public static final String CPU = "cpu";
+    public static final String BLOCK_SIZE = "blocks";
 
 }
