@@ -18,7 +18,7 @@ public class PresetReader {
     public Preset readFile(File modelFile) throws Exception {
 
         Preset preset = new Preset();
-        ModelConfig config = new ModelConfig();
+        ModelConfig config = new ModelConfig("","");
         List<Float> params = new ArrayList<>();
 
         ScannerState state = ScannerState.VERSION;

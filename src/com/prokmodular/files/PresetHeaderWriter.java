@@ -48,5 +48,6 @@ public class PresetHeaderWriter {
             System.out.println("Write exception " + e.getMessage());
         }
 
+        System.out.println("Wrote header file to " + headerFile.getAbsolutePath());
     }
 }

@@ -14,6 +14,6 @@ public class Preset {
 
     public Preset() {
         params = new ArrayList<>();
-        config = new ModelConfig();
+        config = new ModelConfig("","");
     }
 }

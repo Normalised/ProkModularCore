@@ -17,13 +17,14 @@ public class SerialCommunicator {
     private static final char LOG_START = '#';
 
     private static final String HELLO = "zdravo";
+    private static final String helloResponse = "hello:";
+
     private static final String keepAliveCommand = "ping";
     private static final String keepAliveResponse = "pong";
+
     private static final int MAX_KEEP_ALIVE_FAIL_COUNT = 10;
 
     private final Map<String, String> data;
-
-    private static final String helloResponse = "hello:";
 
     private List<SerialCommunicatorListener> listeners;
     private List<ModelParamListener> modelParamListeners;
@@ -103,7 +104,7 @@ public class SerialCommunicator {
             @Override
             public void run() {
                 sendCommand(keepAliveCommand, "");
-                System.out.println("Sending keep alive. Count is " + keepAliveCount);
+                //System.out.println("Sending keep alive. Count is " + keepAliveCount);
                 keepAliveCount++;
                 if (keepAliveCount > MAX_KEEP_ALIVE_FAIL_COUNT) {
                     System.out.println("Max Keep alives missed. Disconnected");
@@ -168,7 +169,7 @@ public class SerialCommunicator {
     private void processSerial(String serialBuffer) {
         serialBuffer = serialBuffer.trim();
 
-        System.out.println("Process serial:" + serialBuffer + ":" + state);
+//        System.out.println("Process serial:" + serialBuffer + ":" + state);
 
         if (!connected && serialBuffer.startsWith(helloResponse)) {
             String helloType = serialBuffer.substring(helloResponse.length());

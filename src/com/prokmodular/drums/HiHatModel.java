@@ -8,17 +8,10 @@ import java.util.List;
 
 public class HiHatModel implements ProkModel {
 
-    public HiHatModel() {
-    }
+    private ModelConfig config = new ModelConfig("hihat","hihat");
 
     @Override
     public ModelConfig getConfig() {
-        ModelConfig config = new ModelConfig();
-
-        config.filename = "hihat";
-        config.hello = "hihat";
-        config.version = 6;
-
         return config;
     }
 

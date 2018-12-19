@@ -5,7 +5,9 @@ public class ModelConfig {
     public String hello = "";
     public int version = 0;
 
-    public ModelConfig() {
+    public ModelConfig(String hello, String filename) {
+        this.hello = hello;
+        this.filename = filename;
     }
 
     public String getName() {

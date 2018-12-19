@@ -9,14 +9,10 @@ import static com.prokmodular.model.ParameterMapping.createLinear;
 import static com.prokmodular.model.ParameterMapping.createSquared;
 
 public class ClapModel implements ProkModel {
+    private ModelConfig config = new ModelConfig("clap","clap_");
+
     @Override
     public ModelConfig getConfig() {
-        ModelConfig config = new ModelConfig();
-
-        config.filename = "clap_";
-        config.hello = "clap";
-        config.version = 5;
-
         return config;
     }
 
