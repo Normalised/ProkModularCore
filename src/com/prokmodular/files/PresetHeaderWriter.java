@@ -35,7 +35,7 @@ public class PresetHeaderWriter {
                 modelString.add("\t{" + String.join(",", str) + "}");
             }
 
-            writer.write("const float defaultParams[16][NUM_PARAMS] = {");
+            writer.write("float defaultParams[16][NUM_PARAMS] = {");
             writer.newLine();
             writer.write(String.join(",\n", modelString));
             writer.newLine();
