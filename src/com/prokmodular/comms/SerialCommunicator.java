@@ -1,17 +1,17 @@
 package com.prokmodular.comms;
 
 import com.prokmodular.model.ModelParamListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 import static java.lang.Float.parseFloat;
 import static java.lang.Integer.parseInt;
 
-/**
- * Created by martin on 10/06/2017 at 16:18
- */
 public class SerialCommunicator {
 
+    final Logger logger = LoggerFactory.getLogger(SerialCommunicator.class);
     private static final char COMMAND_START = '!';
     private static final char PARAM_START = '@';
     private static final char LOG_START = '#';
@@ -63,6 +63,8 @@ public class SerialCommunicator {
 
         portNames = Serial.list();
 
+        logger.debug("Got " + portNames.length + " ports");
+
         // Open the port you are using at the rate you want:
         if (portNames.length > 0) {
             currentPortIndex = 0;
@@ -77,7 +79,7 @@ public class SerialCommunicator {
             }
             testPort();
         } else {
-            System.out.println("No serial ports found.. waiting");
+            logger.debug("No serial ports found.. waiting");
             if(updateTimer != null) updateTimer.cancel();
             connectTimer = new Timer();
             connectTimer.schedule(new TimerTask() {
@@ -96,7 +98,8 @@ public class SerialCommunicator {
     private void portConnected(String helloType) {
         portTestTimer.cancel();
         // we've found the right serial port
-        System.out.println("Serial port found : " + helloType);
+        logger.debug("Serial port found : " + helloType);
+        logger.debug("Connected to " + helloType);
         connected = true;
 
         keepAliveTimer = new Timer();
@@ -104,11 +107,11 @@ public class SerialCommunicator {
             @Override
             public void run() {
                 sendCommand(keepAliveCommand, "");
-                //System.out.println("Sending keep alive. Count is " + keepAliveCount);
+                //logger.debug("Sending keep alive. Count is " + keepAliveCount);
                 keepAliveCount++;
                 if (keepAliveCount > MAX_KEEP_ALIVE_FAIL_COUNT) {
-                    System.out.println("Max Keep alives missed. Disconnected");
-//                    System.out.println("Serial buffer is:" + serialBuffer + ".");
+                    logger.debug("Max Keep alives missed. Disconnected");
+//                    logger.debug("Serial buffer is:" + serialBuffer + ".");
                     keepAliveTimer.cancel();
                     connected = false;
                     sendDisconnect();
@@ -138,7 +141,7 @@ public class SerialCommunicator {
                         state = State.RECEIVING_LOG;
                         serialBuffer = "";
                     } else if (next == 10) {
-                        System.out.println("Received " + serialBuffer);
+                        logger.debug("Received " + serialBuffer);
                     } else if (next == PARAM_START) {
                         state = State.RECEIVING_PARAM;
                         serialBuffer = "";
@@ -169,9 +172,10 @@ public class SerialCommunicator {
     private void processSerial(String serialBuffer) {
         serialBuffer = serialBuffer.trim();
 
-//        System.out.println("Process serial:" + serialBuffer + ":" + state);
+//        logger.debug("Process serial:" + serialBuffer + ":" + state);
 
         if (!connected && serialBuffer.startsWith(helloResponse)) {
+            logger.debug("Got hello response from " + portNames[currentPortIndex]);
             String helloType = serialBuffer.substring(helloResponse.length());
             portConnected(helloType);
             return;
@@ -186,7 +190,7 @@ public class SerialCommunicator {
             }
         } else if (state == State.RECEIVING_LOG) {
             if (!serialBuffer.contains("ping")) {
-                System.out.println("LOG: " + serialBuffer);
+                logger.debug("LOG: " + serialBuffer);
             }
 
         }
@@ -232,7 +236,7 @@ public class SerialCommunicator {
         if (commandName.equals(keepAliveResponse)) {
             keepAliveCount--;
         } else if (commandName.equals("x") || commandName.equals("y")) {
-            System.out.println("Process command: " + commandName + " -> " + value);
+            logger.debug("Process command: " + commandName + " -> " + value);
         }
 
         data.put(commandName, value);
@@ -251,12 +255,13 @@ public class SerialCommunicator {
         // Close the previous one
         if (modulePort != null) modulePort.stop();
         if (currentPortIndex == portNames.length) {
-            System.out.println("No more ports to test");
+            logger.debug("No more ports to test");
             return;
         }
         try {
+            logger.debug("Testing port " + portNames[currentPortIndex]);
             modulePort = new Serial(portNames[currentPortIndex], 19200);
-            System.out.println("Sending hello");
+            logger.debug("Sending hello");
             modulePort.write(COMMAND_START + HELLO + "\n");
             portTestTimer = new Timer();
             portTestTimer.schedule(new TimerTask() {
@@ -266,7 +271,7 @@ public class SerialCommunicator {
                 }
             }, 1000);
         } catch (Exception e) {
-            System.out.println("Error trying port " + Serial.list()[currentPortIndex]);
+            logger.debug("Error trying port " + Serial.list()[currentPortIndex]);
             if (currentPortIndex < Serial.list().length - 1) {
                 currentPortIndex++;
                 testPort();
@@ -276,7 +281,8 @@ public class SerialCommunicator {
 
     private void portFailed() {
         if (!connected) {
-            System.out.println("Port Failed");
+            logger.debug("Port failed : " + portNames[currentPortIndex]);
+            logger.debug("Port Failed");
             portTestTimer.cancel();
             currentPortIndex++;
             testPort();
@@ -294,10 +300,10 @@ public class SerialCommunicator {
             try {
                 modulePort.write(COMMAND_START + commandName + " " + value + "\n");
             } catch (Exception e) {
-                System.out.println("Failed to write to port : " + e.getMessage());
+                logger.debug("Failed to write to port : " + e.getMessage());
             }
         } else {
-            System.out.println("Not sending " + commandName + ". No port connected.");
+            logger.debug("Not sending " + commandName + ". No port connected.");
         }
     }
 
