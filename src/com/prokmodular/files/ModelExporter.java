@@ -1,7 +1,9 @@
 package com.prokmodular.files;
 
+import com.prokmodular.comms.CommandContents;
 import com.prokmodular.comms.Commands;
-import com.prokmodular.comms.SerialCommunicator;
+import com.prokmodular.comms.ModuleSerialConnection;
+import com.prokmodular.comms.ParamMessage;
 import com.prokmodular.model.ModelConfig;
 import com.prokmodular.model.ModelParamListener;
 import com.prokmodular.model.Preset;
@@ -24,7 +26,7 @@ enum LoadedAction {
 
 public class ModelExporter implements ModelParamListener {
 
-    private final SerialCommunicator serial;
+    private final ModuleSerialConnection serial;
     private List<List<Float>> modelParams;
 
     private LocalModelState localModelState = LocalModelState.EMPTY;
@@ -39,9 +41,9 @@ public class ModelExporter implements ModelParamListener {
     private PresetWriter presetWriter;
     private File folderToSaveTo;
 
-    public ModelExporter(SerialCommunicator serialCommunicator) {
+    public ModelExporter(ModuleSerialConnection moduleSerialConnection) {
 
-        serial = serialCommunicator;
+        serial = moduleSerialConnection;
         serial.addModelParamListener(this);
 
         presetWriter = new PresetWriter();
@@ -76,7 +78,7 @@ public class ModelExporter implements ModelParamListener {
 
         if(localModelState == LocalModelState.EMPTY) {
             currentFetchIndex = 0;
-            serial.sendCommand(Commands.SEND_PARAMS, String.valueOf(currentFetchIndex));
+            serial.sendCommand(new CommandContents(Commands.SEND_PARAMS, String.valueOf(currentFetchIndex)));
             System.out.println("Requesting params");
             localModelState = LocalModelState.FETCHING;
         } else if(localModelState == LocalModelState.FETCHING) {
@@ -136,20 +138,21 @@ public class ModelExporter implements ModelParamListener {
     }
 
     @Override
-    public void setCurrentParam(int paramID, float val) {
+    public void setCurrentParam(ParamMessage msg) {
         // Don't care.
     }
 
     @Override
-    public void setParam(int modelIndex, int paramID, float paramValue) {
-        System.out.println("Set Header Param " + modelIndex + " : " + paramID + " : " + paramValue);
+    public void setParam(int modelIndex, ParamMessage msg) {
+        //int paramID , float paramValue
+        System.out.println("Set Header Param " + modelIndex + " : " + msg.id + " : " + msg.value);
 
         ArrayList<Float> params = (ArrayList<Float>) modelParams.get(modelIndex);
-        if(paramID == params.size())  {
-            params.add(paramValue);
+        if(msg.id == params.size())  {
+            params.add(msg.value);
         } else {
-            params.ensureCapacity(paramID);
-            params.set(paramID, paramValue);
+            params.ensureCapacity(msg.id);
+            params.set(msg.id, msg.value);
         }
 
         if(localModelState == LocalModelState.FETCHING) {
@@ -159,7 +162,7 @@ public class ModelExporter implements ModelParamListener {
                 doLoadedAction();
             } else if(unfilledModelIndex > currentFetchIndex) {
                 currentFetchIndex = unfilledModelIndex;
-                serial.sendCommand(Commands.SEND_PARAMS, String.valueOf(currentFetchIndex));
+                serial.sendCommand(new CommandContents(Commands.SEND_PARAMS, String.valueOf(currentFetchIndex)));
             }
         }
     }

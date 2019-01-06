@@ -1,5 +1,8 @@
 package com.prokmodular.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by martin on 28/07/2017 at 14:26
  */
@@ -11,6 +14,7 @@ enum ParameterMappingType {
 
 public class ParameterMapping {
 
+    final Logger logger = LoggerFactory.getLogger(ParameterMapping.class);
     private ParameterMappingType type = ParameterMappingType.NONE;
 
     public float inLow = 0;
@@ -83,7 +87,6 @@ public class ParameterMapping {
             return val;
         }
 
-        //println("From Module " + val + " : " + outLow + " : " + outHigh);
         if(val < outLow) val = outLow;
         if(val > outHigh) val = outHigh;
 
@@ -92,17 +95,15 @@ public class ParameterMapping {
         if(type == ParameterMappingType.LINEAR) {
             val = inLow + (inRange * dv);
         } else if(type == ParameterMappingType.SQUARE) {
-            //println("From Module Sq " + val);
             double dvsqrt = Math.sqrt(dv);
             val = (float) (inLow + (inRange * dvsqrt));
-            //println("Mapped to " + val);
         }
 
         if(val < inLow) {
-            System.out.println("Mapped param underflow " + val + " : " + inLow);
+            logger.debug("Mapped param underflow " + val + " : " + inLow);
         }
         if(val > inHigh) {
-            System.out.println("Mapped param overflow " + val + " : " + inHigh);
+            logger.debug("Mapped param overflow " + val + " : " + inHigh);
         }
         return val;
     }
