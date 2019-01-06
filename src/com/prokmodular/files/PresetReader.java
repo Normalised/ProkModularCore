@@ -2,6 +2,8 @@ package com.prokmodular.files;
 
 import com.prokmodular.model.ModelConfig;
 import com.prokmodular.model.Preset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,6 +13,7 @@ import java.util.Scanner;
 
 public class PresetReader {
 
+    final Logger logger = LoggerFactory.getLogger(PresetReader.class);
     private enum ScannerState {
         VERSION, MODEL, PARAMS
     }
@@ -39,7 +42,7 @@ public class PresetReader {
                     if(parts.length == 2) {
                         params.add(Float.parseFloat(parts[1]));
                     } else {
-                        System.out.println("Config format is wrong! " + param);
+                        logger.debug("Config format is wrong! " + param);
                         throw new Exception("Config is broken");
                     }
                 }
@@ -47,7 +50,7 @@ public class PresetReader {
             scan.close();
 
         } catch (FileNotFoundException e) {
-            System.out.println("Model file not found " + modelFile.getAbsolutePath());
+            logger.debug("Model file not found " + modelFile.getAbsolutePath());
             throw new Exception("Model file doesn't exist");
         }
 

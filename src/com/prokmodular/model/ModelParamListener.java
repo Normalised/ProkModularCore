@@ -1,10 +1,9 @@
 package com.prokmodular.model;
 
-/**
- * Created by martin on 31/07/2017 at 19:58
- */
+import com.prokmodular.comms.ParamMessage;
+
 public interface ModelParamListener {
     void setModelSize(int numParams);
-    void setCurrentParam(int paramID, float val);
-    void setParam(int modelIndex, int paramID, float paramValue);
+    void setCurrentParam(ParamMessage param);
+    void setParam(int modelIndex, ParamMessage param);
 }

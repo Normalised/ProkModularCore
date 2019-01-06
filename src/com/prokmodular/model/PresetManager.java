@@ -25,8 +25,6 @@ public class PresetManager {
         if(model == currentModel) return;
         model = currentModel;
         presetFiles.clear();
-
-        //println("Set Current Model " + currentModel.getConfig().getName());
     }
 
     public List<File> listFilesFrom(File path) {

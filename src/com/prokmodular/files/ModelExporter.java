@@ -1,7 +1,7 @@
 package com.prokmodular.files;
 
 import com.prokmodular.comms.Commands;
-import com.prokmodular.comms.SerialCommunicator;
+import com.prokmodular.comms.ModuleSerialConnection;
 import com.prokmodular.model.ModelConfig;
 import com.prokmodular.model.ModelParamListener;
 import com.prokmodular.model.Preset;
@@ -24,7 +24,7 @@ enum LoadedAction {
 
 public class ModelExporter implements ModelParamListener {
 
-    private final SerialCommunicator serial;
+    private final ModuleSerialConnection serial;
     private List<List<Float>> modelParams;
 
     private LocalModelState localModelState = LocalModelState.EMPTY;
@@ -39,9 +39,9 @@ public class ModelExporter implements ModelParamListener {
     private PresetWriter presetWriter;
     private File folderToSaveTo;
 
-    public ModelExporter(SerialCommunicator serialCommunicator) {
+    public ModelExporter(ModuleSerialConnection moduleSerialConnection) {
 
-        serial = serialCommunicator;
+        serial = moduleSerialConnection;
         serial.addModelParamListener(this);
 
         presetWriter = new PresetWriter();

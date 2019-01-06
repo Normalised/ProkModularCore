@@ -1,6 +1,9 @@
 package com.prokmodular.comms;
 
 public class Commands {
+    public static final String HELLO = "zdravo";
+    public static final String KEEP_ALIVE = "ping";
+
     public static final String CLEAR = "clear";
     public static final String TRIGGER = "trigger";
     public static final String MORPH_X = "X";
