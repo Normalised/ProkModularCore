@@ -99,7 +99,8 @@ public class ModuleScanner implements HandshakeStatusListener {
         }
         try {
             logger.debug("Testing port " + portNames[currentPortIndex]);
-            currentModuleConnection = new ModuleSerialConnection(portNames[currentPortIndex]);
+            Serial serial = new Serial(portNames[currentPortIndex], 19200);
+            currentModuleConnection = new ModuleSerialConnection(serial);
             currentModuleConnection.addHandshakeStatusListener(this);
             logger.debug("Sending hello");
             portTestTimer = new Timer();
@@ -190,6 +191,10 @@ public class ModuleScanner implements HandshakeStatusListener {
     }
 
     public void scan() {
+        logger.debug("Scan");
+    }
 
+    public int getPortCount() {
+        return Serial.list().length;
     }
 }

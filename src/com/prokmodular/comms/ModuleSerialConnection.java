@@ -63,7 +63,7 @@ public class ModuleSerialConnection {
 
     private CommandContents keepAliveCommand = new CommandContents(Commands.KEEP_ALIVE, "");
 
-    public ModuleSerialConnection(String portName) {
+    public ModuleSerialConnection(Serial port) {
         handshakeStatusListeners = new ArrayList<>();
 
         nextHandshakeMessage = new Stack<String>();
@@ -80,7 +80,7 @@ public class ModuleSerialConnection {
         listeners = new ArrayList<>();
         modelParamListeners = new ArrayList<>();
         incomingDataBuffer = new StringBuffer();
-        modulePort = new Serial(portName, 19200);
+        modulePort = port;//new Serial(portName, 19200);
     }
 
     public String getDataValue(String name) {
