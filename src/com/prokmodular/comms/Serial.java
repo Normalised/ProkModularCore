@@ -229,9 +229,9 @@ public class Serial implements SerialPortEventListener {
   }
 
 
-  public static Map<String, String> getProperties(String portName) {
-    return SerialPortList.getPortProperties(portName);
-  }
+//  public static Map<String, String> getProperties(String portName) {
+//    return SerialPortList.getPortProperties(portName);
+//  }
 
 
   /**

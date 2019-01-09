@@ -18,13 +18,6 @@ public class ModuleSerialConnection {
 
     private HashMap<String, String> dataCache;
 
-    public void addHandshakeStatusListener(HandshakeStatusListener listener) {
-        handshakeStatusListeners.add(listener);
-    }
-
-    public void removeHandshakeStatusListener(HandshakeStatusListener listener) {
-        handshakeStatusListeners.remove(listener);
-    }
     public enum HandshakeStatus {
         WAITING, UNKNOWN_MODEL, FIRMWARE_MISMATCH, MODEL_MISMATCH, OK
     }
@@ -58,7 +51,6 @@ public class ModuleSerialConnection {
 
     private ReceiveState receiveState = ReceiveState.IDLE;
     private Serial modulePort;
-    //private String serialBuffer = "";
     private StringBuffer incomingDataBuffer;
 
     private CommandContents keepAliveCommand = new CommandContents(Commands.KEEP_ALIVE, "");
@@ -66,7 +58,7 @@ public class ModuleSerialConnection {
     public ModuleSerialConnection(Serial port) {
         handshakeStatusListeners = new ArrayList<>();
 
-        nextHandshakeMessage = new Stack<String>();
+        nextHandshakeMessage = new Stack<>();
         nextHandshakeMessage.push(Messages.QUAD_SELECT_INDEX);
         nextHandshakeMessage.push(Messages.QUAD_STATE);
         nextHandshakeMessage.push(Messages.PARAM_SIZE);
@@ -81,6 +73,18 @@ public class ModuleSerialConnection {
         modelParamListeners = new ArrayList<>();
         incomingDataBuffer = new StringBuffer();
         modulePort = port;//new Serial(portName, 19200);
+    }
+
+    public void addHandshakeStatusListener(HandshakeStatusListener listener) {
+        handshakeStatusListeners.add(listener);
+    }
+
+    public void removeHandshakeStatusListener(HandshakeStatusListener listener) {
+        handshakeStatusListeners.remove(listener);
+    }
+
+    public HandshakeStatus getHandshakeStatus() {
+        return handshakeStatus;
     }
 
     public String getDataValue(String name) {

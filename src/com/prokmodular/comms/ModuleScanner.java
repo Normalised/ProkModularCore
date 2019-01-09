@@ -27,6 +27,9 @@ public class ModuleScanner implements HandshakeStatusListener {
 
     private List<ModuleScanStatusListener> scanStatusListeners;
 
+    private int handshakeWaitCount = 0;
+    private int handshakeWaitCountLimit = 3;
+
     public ModuleScanner() {
         scanStatusListeners = new ArrayList<>();
         models = new HashMap<>();
@@ -34,25 +37,22 @@ public class ModuleScanner implements HandshakeStatusListener {
         modulePorts = new HashMap<>();
     }
 
-    public void init(boolean useExternalUpdate) {
+    public void scan() {
         // List all the available serial ports:
 
         portNames = Serial.list();
 
-        logger.debug("Got " + portNames.length + " ports");
+        logger.debug("Starting port scan. Got " + portNames.length + " ports");
 
-        // Open the port you are using at the rate you want:
         if (portNames.length > 0) {
             currentPortIndex = 0;
-            if(!useExternalUpdate) {
-                updateTimer = new Timer();
-                updateTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        update();
-                    }
-                }, 20);
-            }
+//                updateTimer = new Timer();
+//                updateTimer.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        update();
+//                    }
+//                }, 20);
             testPort();
         } else {
             logger.debug("No serial ports found.. waiting");
@@ -61,7 +61,7 @@ public class ModuleScanner implements HandshakeStatusListener {
             connectTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    init(false);
+                    scan();
                 }
             }, 1000);
         }
@@ -103,13 +103,14 @@ public class ModuleScanner implements HandshakeStatusListener {
             currentModuleConnection = new ModuleSerialConnection(serial);
             currentModuleConnection.addHandshakeStatusListener(this);
             logger.debug("Sending hello");
+            handshakeWaitCount = 0;
             portTestTimer = new Timer();
             portTestTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     checkCurrentModuleHandshakeStatus();
                 }
-            }, 1000);
+            }, 300, (300 * (handshakeWaitCountLimit + 1) ));
         } catch (Exception e) {
             logger.debug("Error trying port " + Serial.list()[currentPortIndex]);
             if (currentPortIndex < Serial.list().length - 1) {
@@ -121,6 +122,14 @@ public class ModuleScanner implements HandshakeStatusListener {
 
     private void checkCurrentModuleHandshakeStatus() {
         logger.debug("Checking current module handshake status");
+        if(currentModuleConnection.getHandshakeStatus() == ModuleSerialConnection.HandshakeStatus.WAITING) {
+            logger.debug("Still waiting for handshake");
+            handshakeWaitCount++;
+        }
+        if(handshakeWaitCount == handshakeWaitCountLimit) {
+            logger.debug("Port is taking too long, trying next");
+            portFailed();
+        }
     }
 
     private void processSerial(StringBuffer serialBuffer) {
@@ -181,7 +190,7 @@ public class ModuleScanner implements HandshakeStatusListener {
         List<ModuleScanStatusListener> tempListeners = new ArrayList<>(scanStatusListeners);
 
         for (ModuleScanStatusListener l : tempListeners) {
-            l.scanComplete(modulePorts);
+            l.scanComplete(modules);
         }
 
     }
@@ -190,11 +199,15 @@ public class ModuleScanner implements HandshakeStatusListener {
         models.put(model.getConfig().getName(), model);
     }
 
-    public void scan() {
-        logger.debug("Scan");
-    }
-
     public int getPortCount() {
         return Serial.list().length;
+    }
+
+    public void addScanStatusListener(ModuleScanStatusListener l) {
+        scanStatusListeners.add(l);
+    }
+
+    public void removeScanStatusListener(ModuleScanStatusListener l) {
+        scanStatusListeners.remove(l);
     }
 }
