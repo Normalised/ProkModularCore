@@ -5,7 +5,7 @@ import com.prokmodular.ui.ModelUIBuilder;
 
 public class KickUI implements ModelUI {
     @Override
-    public void createUI(ModelUIBuilder ui, int version) {
+    public void createUI(ModelUIBuilder ui, int firmwareVersion, int version) {
         ui.addSineWithEnvelope("Sine A");
 
         ui.addSpace();

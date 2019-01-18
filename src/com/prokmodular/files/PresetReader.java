@@ -2,6 +2,7 @@ package com.prokmodular.files;
 
 import com.prokmodular.model.ModelConfig;
 import com.prokmodular.model.Preset;
+import com.prokmodular.model.ProkModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,35 @@ public class PresetReader {
     final Logger logger = LoggerFactory.getLogger(PresetReader.class);
     private enum ScannerState {
         VERSION, MODEL, PARAMS
+    }
+
+    public boolean modelCanReadFile(ProkModel model, File file) {
+
+        ScannerState state = ScannerState.VERSION;
+
+        try {
+            Scanner scan = new Scanner(file);
+            while (scan.hasNextLine()) {
+                if (state == ScannerState.VERSION) {
+                    int version = Integer.parseInt(scan.nextLine());
+                    if(model.getConfig().version < version) {
+                        return false;
+                    }
+                    state = ScannerState.MODEL;
+                } else if (state == ScannerState.MODEL) {
+                    String type = scan.nextLine();
+                    if(type.equalsIgnoreCase(model.getConfig().getName())) {
+                        return true;
+                    }
+                    state = ScannerState.PARAMS;
+
+                }
+            }
+        } catch (FileNotFoundException e) {
+            logger.debug("File not found " + file.getAbsolutePath());
+            return false;
+        }
+        return false;
     }
 
     public Preset readFile(File modelFile) throws Exception {

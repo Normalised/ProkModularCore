@@ -8,7 +8,7 @@ import static com.prokmodular.model.ParameterMapping.createSquared;
 
 public class HiHatUI implements ModelUI {
     @Override
-    public void createUI(ModelUIBuilder ui, int version) {
+    public void createUI(ModelUIBuilder ui, int firmwareVersion, int version) {
         //ui.addKnob("Base Freq", 0, 1000);
         ui.addSlider("Base Freq", 0, 1000);
 
@@ -58,18 +58,18 @@ public class HiHatUI implements ModelUI {
         ui.addSlider("Decay Low", createSquared(0, 100, 1, 16000));
         ui.addSlider("Low Extend", createLinear(0, 100, 0, 32000));
         if(version > 5) {
-            ui.addIntSlider("Low Extend Factor", 1,64);
+            ui.addIntSlider("Low Extend Factor", -8,64);
         }
         ui.addSlider("Decay Mid", createSquared(0, 100, 1, 16000));
         ui.addSlider("Mid Extend", createLinear(0, 100, 0, 32000));
         if(version > 5) {
-            ui.addIntSlider("Mid Extend Factor", 1,64);
+            ui.addIntSlider("Mid Extend Factor", -8,64);
         }
 
         ui.addSlider("Decay High", createSquared(0, 100, 1, 16000));
         ui.addSlider("High Extend", createLinear(0, 100, 0, 32000));
         if(version > 5) {
-            ui.addIntSlider("High Extend Factor", 1,64);
+            ui.addIntSlider("High Extend Factor", -8,64);
         }
 
         ui.addSpace();
@@ -78,7 +78,7 @@ public class HiHatUI implements ModelUI {
         ui.addSlider("Decay Noise", createSquared(0, 100, 1, 8000));
         ui.addSlider("Noise Extend", createLinear(0, 100, 0, 32000));
         if(version > 5) {
-            ui.addIntSlider("Noise Extend Factor", 1,64);
+            ui.addIntSlider("Noise Extend Factor", -8,64);
         }
 
         ui.nextColumn();

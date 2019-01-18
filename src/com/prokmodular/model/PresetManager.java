@@ -18,7 +18,6 @@ public class PresetManager {
 
         reader = new PresetReader();
         writer = new PresetWriter();
-
     }
 
     public void setCurrentModel(ProkModel currentModel) {
@@ -35,7 +34,9 @@ public class PresetManager {
         presetFiles.clear();
 
         for(File file : files) {
-            presetFiles.add(file);
+            if(reader.modelCanReadFile(model, file)) {
+                presetFiles.add(file);
+            }
         }
         return presetFiles;
     }

@@ -31,7 +31,7 @@ public interface ModelUIBuilder {
 
     Object addTunableSlider(String name, int low, int high);
 
-    void addSineWithEnvelope(String name, int maxFreq);
+    void addSineWithEnvelope(String name, int freqDecaySamples);
 
     void addShortExpEnv(String name);
 }

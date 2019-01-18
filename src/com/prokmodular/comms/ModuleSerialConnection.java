@@ -15,6 +15,7 @@ public class ModuleSerialConnection {
     private static final char COMMAND_START = '!';
     private static final char PARAM_START = '@';
     private static final char LOG_START = '#';
+    private final Timer updateTimer;
 
     private HashMap<String, String> dataCache;
 
@@ -34,6 +35,7 @@ public class ModuleSerialConnection {
     private static final int MAX_KEEP_ALIVE_FAIL_COUNT = 10;
 
     private List<ModuleConnectionListener> listeners;
+    private List<ModuleCommandListener> commandListeners;
     private List<ModelParamListener> modelParamListeners;
 
     private List<HandshakeStatusListener> handshakeStatusListeners;
@@ -45,9 +47,6 @@ public class ModuleSerialConnection {
         IDLE,
         RECEIVING_LOG, RECEIVING_COMMAND, RECEIVING_PARAM,
     }
-
-    // Connected to the module, not to any serial port
-    public boolean connected = false;
 
     private ReceiveState receiveState = ReceiveState.IDLE;
     private Serial modulePort;
@@ -65,14 +64,27 @@ public class ModuleSerialConnection {
         nextHandshakeMessage.push(Messages.HAS_SD_CARD);
         nextHandshakeMessage.push(Messages.VERSION);
         nextHandshakeMessage.push(Messages.FIRMWARE_VERSION);
-        nextHandshakeMessage.push(Messages.NAME);
+        //nextHandshakeMessage.push(Messages.NAME);
         nextHandshakeMessage.push(Messages.HELLO_RESPONSE);
 
         dataCache = new HashMap<>();
         listeners = new ArrayList<>();
         modelParamListeners = new ArrayList<>();
+        commandListeners = new ArrayList<>();
+
         incomingDataBuffer = new StringBuffer();
         modulePort = port;//new Serial(portName, 19200);
+        updateTimer = new Timer();
+        updateTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                update();
+            }
+        }, 5, 5);
+    }
+
+    public String getPortName() {
+        return modulePort.port.getPortName();
     }
 
     public void addHandshakeStatusListener(HandshakeStatusListener listener) {
@@ -101,8 +113,8 @@ public class ModuleSerialConnection {
                 if (keepAliveCount > MAX_KEEP_ALIVE_FAIL_COUNT) {
                     logger.debug("Max Keep alives missed. Disconnected");
                     keepAliveTimer.cancel();
-                    connected = false;
                     sendDisconnect();
+                    handshakeStatus = HandshakeStatus.WAITING;
                 }
             }
         }, 1500, 1500);
@@ -110,6 +122,7 @@ public class ModuleSerialConnection {
 
     public void close() {
         logger.debug("Closing port. Cancel update timer");
+        updateTimer.cancel();
     }
 
     public void update() {
@@ -143,8 +156,8 @@ public class ModuleSerialConnection {
                     } else {
                         appendData = true;
                     }
-                } else if(receiveState == ReceiveState.RECEIVING_LOG) {
-                    if(next == 10) {
+                } else if (receiveState == ReceiveState.RECEIVING_LOG) {
+                    if (next == 10) {
                         processLog(incomingDataBuffer);
                         clearBuffer = true;
                         receiveState = ReceiveState.IDLE;
@@ -160,10 +173,11 @@ public class ModuleSerialConnection {
                         appendData = true;
                     }
                 }
-                if(clearBuffer) {
+                if (clearBuffer) {
+                    //logger.debug("Clear buffer : " + incomingDataBuffer);
                     incomingDataBuffer = new StringBuffer();
                     clearBuffer = false;
-                } else if(appendData) {
+                } else if (appendData) {
                     incomingDataBuffer.append(next);
                     appendData = false;
                 }
@@ -172,11 +186,17 @@ public class ModuleSerialConnection {
     }
 
     private void processLog(StringBuffer incomingDataBuffer) {
-        logger.debug("ModuleLog:: " + incomingDataBuffer.toString());
+        logger.debug("ModuleLog::" + incomingDataBuffer.toString());
     }
 
     private CommandContents parseCommand(String message) throws Exception {
-        String[] parts = message.split(" ");
+        String[] parts;
+        if (message.contains(" ")) {
+            parts = message.split(" ");
+        } else {
+            parts = message.split(":");
+        }
+
         if (parts.length == 2) {
             String commandName = parts[0].toLowerCase();
             String value = parts[1];
@@ -229,8 +249,9 @@ public class ModuleSerialConnection {
             e.printStackTrace();
         }
 
-        if(command == null) return;
+        if (command == null) return;
 
+        //logger.debug("Process command " + command.name + " : " + command.data);
         if (handshakeStatus != HandshakeStatus.OK) {
             processHandshake(command);
         } else {
@@ -246,43 +267,67 @@ public class ModuleSerialConnection {
                     mpl.setModelSize(Integer.parseInt(command.data));
                 }
             }
-            //for (ModuleConnectionListener l : listeners) {
-            //l.onData(commandName, value);
-            //}
+            for (ModuleCommandListener l : commandListeners) {
+                l.onCommand(command);
+            }
         }
         // TODO : Keep a timestamped history of commands to replay and simulate a module.
         dataCache.put(command.name, command.data);
     }
 
-    // HELLO, NAME, FIRMWARE_VERSION, MODEL_VERSION, SD_CHECK,
+    // HELLO(NAME), FIRMWARE_VERSION, MODEL_VERSION, SD_CHECK,
     // PARAM_COUNT, CURRENT_PARAMS, QUAD_STATE, CURRENT_QUAD, COMPLETE
     private void processHandshake(CommandContents command) {
 
-        if(command.is(nextHandshakeMessage.peek())) {
+        if (command.is(nextHandshakeMessage.peek())) {
+            logger.debug("Got handshake message " + command.name + " : " + command.data);
             nextHandshakeMessage.pop();
+            if (command.name.equals(Messages.HELLO_RESPONSE)) {
+                //logger.debug("Got hello, module name is " + command.data);
+                dataCache.put(Messages.NAME, command.data);
+            } else {
+                dataCache.put(command.name, command.data);
+            }
         }
 
-        if(nextHandshakeMessage.isEmpty()) {
+        if (nextHandshakeMessage.isEmpty()) {
             handshakeStatus = HandshakeStatus.OK;
+            startKeepAlive();
             sendHandshakeComplete();
         }
     }
 
     private void sendHandshakeComplete() {
-        for(HandshakeStatusListener l : handshakeStatusListeners) {
+        List<HandshakeStatusListener> listeners = new ArrayList<>(handshakeStatusListeners);
+        for (HandshakeStatusListener l : listeners) {
             l.onHandshakeComplete(this);
         }
     }
 
     public void sendCurrentParam(ParamMessage param) {
         if (modulePort != null) {
+            logger.debug("Send param " + param.id + " : " + param.value);
             modulePort.write(PARAM_START + "100 " + param.id + ":" + Float.toString(param.value) + "\n");
         }
+    }
+
+    public void sendCommandWithNoData(String commandName) {
+        if (modulePort != null) {
+            try {
+                modulePort.write(COMMAND_START + commandName + "\n");
+            } catch (Exception e) {
+                logger.debug("Failed to write to port : " + e.getMessage());
+            }
+        } else {
+            logger.debug("Not sending " + commandName + ". No port connected.");
+        }
+
     }
 
     public void sendCommand(CommandContents command) {
         if (modulePort != null) {
             try {
+                //logger.debug("Send Command " + command.name + " " + command.data);
                 modulePort.write(COMMAND_START + command.name + " " + command.data + "\n");
             } catch (Exception e) {
                 logger.debug("Failed to write to port : " + e.getMessage());
@@ -301,6 +346,18 @@ public class ModuleSerialConnection {
     public void removeModelParamListener(ModelParamListener modelParamListener) {
         if (modelParamListeners.contains(modelParamListener)) {
             modelParamListeners.remove(modelParamListener);
+        }
+    }
+
+    public void addModuleCommandListener(ModuleCommandListener l) {
+        if (!commandListeners.contains(l)) {
+            commandListeners.add(l);
+        }
+    }
+
+    public void removeModuleCommandListener(ModuleCommandListener l) {
+        if (commandListeners.contains(l)) {
+            commandListeners.remove(l);
         }
     }
 

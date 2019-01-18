@@ -23,7 +23,6 @@ public class ModuleScanner implements HandshakeStatusListener {
     // All ports that have responded to a hello request
     private Map<String, List<ModuleSerialConnection>> modulePorts;
     private int currentPortIndex = 0;
-    private Timer updateTimer;
 
     private List<ModuleScanStatusListener> scanStatusListeners;
 
@@ -46,17 +45,10 @@ public class ModuleScanner implements HandshakeStatusListener {
 
         if (portNames.length > 0) {
             currentPortIndex = 0;
-//                updateTimer = new Timer();
-//                updateTimer.schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        update();
-//                    }
-//                }, 20);
             testPort();
         } else {
             logger.debug("No serial ports found.. waiting");
-            if(updateTimer != null) updateTimer.cancel();
+            //if(updateTimer != null) updateTimer.cancel();
             connectTimer = new Timer();
             connectTimer.schedule(new TimerTask() {
                 @Override
@@ -68,7 +60,7 @@ public class ModuleScanner implements HandshakeStatusListener {
     }
 
     public void close() {
-        updateTimer.cancel();
+        //updateTimer.cancel();
     }
 
     private void update() {
@@ -87,7 +79,7 @@ public class ModuleScanner implements HandshakeStatusListener {
 
     private void testPort() {
         // Close the previous one
-        if(currentModuleConnection != null) {
+        if (currentModuleConnection != null) {
             currentModuleConnection.removeHandshakeStatusListener(this);
         }
 
@@ -102,15 +94,15 @@ public class ModuleScanner implements HandshakeStatusListener {
             Serial serial = new Serial(portNames[currentPortIndex], 19200);
             currentModuleConnection = new ModuleSerialConnection(serial);
             currentModuleConnection.addHandshakeStatusListener(this);
-            logger.debug("Sending hello");
             handshakeWaitCount = 0;
+            currentModuleConnection.sendCommandWithNoData(Commands.HELLO);
             portTestTimer = new Timer();
             portTestTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     checkCurrentModuleHandshakeStatus();
                 }
-            }, 300, (300 * (handshakeWaitCountLimit + 1) ));
+            }, 300, (300 * (handshakeWaitCountLimit + 1)));
         } catch (Exception e) {
             logger.debug("Error trying port " + Serial.list()[currentPortIndex]);
             if (currentPortIndex < Serial.list().length - 1) {
@@ -122,11 +114,11 @@ public class ModuleScanner implements HandshakeStatusListener {
 
     private void checkCurrentModuleHandshakeStatus() {
         logger.debug("Checking current module handshake status");
-        if(currentModuleConnection.getHandshakeStatus() == ModuleSerialConnection.HandshakeStatus.WAITING) {
+        if (currentModuleConnection.getHandshakeStatus() == ModuleSerialConnection.HandshakeStatus.WAITING) {
             logger.debug("Still waiting for handshake");
             handshakeWaitCount++;
         }
-        if(handshakeWaitCount == handshakeWaitCountLimit) {
+        if (handshakeWaitCount == handshakeWaitCountLimit) {
             logger.debug("Port is taking too long, trying next");
             portFailed();
         }
@@ -139,7 +131,7 @@ public class ModuleScanner implements HandshakeStatusListener {
         // we've found a module serial port
         logger.debug("Module completed handshake : " + module.getDataValue(Messages.NAME));
         String moduleType = module.getDataValue(Messages.NAME);
-        if(modulePorts.containsKey(moduleType)) {
+        if (modulePorts.containsKey(moduleType)) {
             modulePorts.get(moduleType).add(module);
         } else {
             ArrayList<ModuleSerialConnection> modules = new ArrayList<>();
@@ -165,27 +157,23 @@ public class ModuleScanner implements HandshakeStatusListener {
     public void portsChecked() {
         logger.debug("All Ports Checked");
         modules = new ArrayList<>();
-        for(Map.Entry<String, List<ModuleSerialConnection>> connection : modulePorts.entrySet()) {
-            logger.debug("Available module type : " + connection.getKey() + " with " + connection.getValue().size() + " ports.");
-            ModuleInfo module = new ModuleInfo();
-            String moduleType = connection.getKey();
-            if(moduleType.contains("_")) {
-                moduleType = moduleType.substring(0,moduleType.indexOf("_"));
+        for (Map.Entry<String, List<ModuleSerialConnection>> connections : modulePorts.entrySet()) {
+            logger.debug("Available module type : " + connections.getKey() + " with " + connections.getValue().size() + " ports.");
+            for(ModuleSerialConnection connection : connections.getValue()) {
+                ModuleInfo module = new ModuleInfo();
+                String moduleType = connections.getKey();
+                if (moduleType.contains("_")) {
+                    moduleType = moduleType.substring(0, moduleType.indexOf("_"));
+                }
+                module.type = moduleType;
+
+                if (models.containsKey(moduleType)) {
+                    module.setConnection(connection, models.get(moduleType));
+                    modules.add(module);
+                } else {
+                    logger.warn("Module type not found in models registry " + moduleType);
+                }
             }
-            module.type = moduleType;
-            if(!models.containsKey(moduleType)) {
-                //module.setUnknownType();
-            } else {
-                module.model = models.get(moduleType);
-
-                // App can wire in appropriate UI when opening param editor
-                //module.ui = uis.get(moduleType);
-
-                //module.setValid();
-                //moduleState.put("name", module.getModelName());
-            }
-            modules.add(module);
-
         }
         List<ModuleScanStatusListener> tempListeners = new ArrayList<>(scanStatusListeners);
 

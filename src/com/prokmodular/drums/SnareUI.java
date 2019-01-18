@@ -5,10 +5,10 @@ import com.prokmodular.ui.ModelUIBuilder;
 
 public class SnareUI implements ModelUI {
     @Override
-    public void createUI(ModelUIBuilder ui, int version) {
-        ui.addSineWithEnvelope("Sine A", 3000);
+    public void createUI(ModelUIBuilder ui, int firmwareVersion, int version) {
+        ui.addSineWithEnvelope("Sine A", 32500);
         ui.addSpace();
-        ui.addSineWithEnvelope("Sine B", 3000);
+        ui.addSineWithEnvelope("Sine B", 32500);
         ui.addSpace();
 
         ui.addADEnvelope("Amp A");

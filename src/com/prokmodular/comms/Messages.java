@@ -2,7 +2,7 @@ package com.prokmodular.comms;
 
 public class Messages {
 
-    public static final String HELLO_RESPONSE = "hello:";
+    public static final String HELLO_RESPONSE = "hello";
 
     public static final String KEEP_ALIVE = "pong";
 

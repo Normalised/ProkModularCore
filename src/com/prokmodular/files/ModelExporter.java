@@ -26,7 +26,7 @@ enum LoadedAction {
 
 public class ModelExporter implements ModelParamListener {
 
-    private final ModuleSerialConnection serial;
+    private ModuleSerialConnection serial;
     private List<List<Float>> modelParams;
 
     private LocalModelState localModelState = LocalModelState.EMPTY;
@@ -41,10 +41,7 @@ public class ModelExporter implements ModelParamListener {
     private PresetWriter presetWriter;
     private File folderToSaveTo;
 
-    public ModelExporter(ModuleSerialConnection moduleSerialConnection) {
-
-        serial = moduleSerialConnection;
-        serial.addModelParamListener(this);
+    public ModelExporter() {
 
         presetWriter = new PresetWriter();
 
@@ -185,5 +182,13 @@ public class ModelExporter implements ModelParamListener {
         }
         System.out.println("All params received");
         return 16;
+    }
+
+    public void setConnection(ModuleSerialConnection connectionToUse) {
+        if(serial != null) {
+            serial.removeModelParamListener(this);
+        }
+        serial = connectionToUse;
+        serial.addModelParamListener(this);
     }
 }

@@ -8,7 +8,7 @@ import static com.prokmodular.model.ParameterMapping.createSquared;
 
 public class ClapUI implements ModelUI {
     @Override
-    public void createUI(ModelUIBuilder ui, int version) {
+    public void createUI(ModelUIBuilder ui, int firmwareVersion, int version) {
         ui.addMixerChannel("White Noise");
         ui.addMixerChannel("Sid Noise");
         ui.addMixerChannel("Pink Noise");
