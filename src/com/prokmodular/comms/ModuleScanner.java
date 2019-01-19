@@ -1,6 +1,6 @@
 package com.prokmodular.comms;
 
-import com.prokmodular.ModuleInfo;
+import com.prokmodular.ProkModule;
 import com.prokmodular.model.ProkModel;
 import org.slf4j.Logger;
 
@@ -13,7 +13,7 @@ public class ModuleScanner implements HandshakeStatusListener {
     final Logger logger = getLogger(ModuleScanner.class);
 
     private Map<String, ProkModel> models;
-    private List<ModuleInfo> modules;
+    private List<ProkModule> modules;
 
     private ModuleSerialConnection currentModuleConnection;
     private Timer portTestTimer;
@@ -160,7 +160,7 @@ public class ModuleScanner implements HandshakeStatusListener {
         for (Map.Entry<String, List<ModuleSerialConnection>> connections : modulePorts.entrySet()) {
             logger.debug("Available module type : " + connections.getKey() + " with " + connections.getValue().size() + " ports.");
             for(ModuleSerialConnection connection : connections.getValue()) {
-                ModuleInfo module = new ModuleInfo();
+                ProkModule module = new ProkModule();
                 String moduleType = connections.getKey();
                 if (moduleType.contains("_")) {
                     moduleType = moduleType.substring(0, moduleType.indexOf("_"));

@@ -1,5 +1,6 @@
 package com.prokmodular.files;
 
+import com.prokmodular.ProkModule;
 import com.prokmodular.comms.CommandContents;
 import com.prokmodular.comms.Commands;
 import com.prokmodular.comms.ModuleSerialConnection;
@@ -26,7 +27,6 @@ enum LoadedAction {
 
 public class ModelExporter implements ModelParamListener {
 
-    private ModuleSerialConnection serial;
     private List<List<Float>> modelParams;
 
     private LocalModelState localModelState = LocalModelState.EMPTY;
@@ -40,6 +40,7 @@ public class ModelExporter implements ModelParamListener {
 
     private PresetWriter presetWriter;
     private File folderToSaveTo;
+    private ProkModule module;
 
     public ModelExporter() {
 
@@ -75,7 +76,8 @@ public class ModelExporter implements ModelParamListener {
 
         if(localModelState == LocalModelState.EMPTY) {
             currentFetchIndex = 0;
-            serial.sendCommand(new CommandContents(Commands.SEND_PARAMS, String.valueOf(currentFetchIndex)));
+            module.sendParams(currentFetchIndex);
+
             System.out.println("Requesting params");
             localModelState = LocalModelState.FETCHING;
         } else if(localModelState == LocalModelState.FETCHING) {
@@ -159,7 +161,7 @@ public class ModelExporter implements ModelParamListener {
                 doLoadedAction();
             } else if(unfilledModelIndex > currentFetchIndex) {
                 currentFetchIndex = unfilledModelIndex;
-                serial.sendCommand(new CommandContents(Commands.SEND_PARAMS, String.valueOf(currentFetchIndex)));
+                module.sendParams(currentFetchIndex);
             }
         }
     }
@@ -184,11 +186,13 @@ public class ModelExporter implements ModelParamListener {
         return 16;
     }
 
-    public void setConnection(ModuleSerialConnection connectionToUse) {
-        if(serial != null) {
-            serial.removeModelParamListener(this);
+    public void setModule(ProkModule currentModule) {
+        if(module != null) {
+
+            module.removeParamListener(this);
         }
-        serial = connectionToUse;
-        serial.addModelParamListener(this);
+
+        module = currentModule;
+        module.addParamListener(this);
     }
 }
