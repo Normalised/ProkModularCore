@@ -306,8 +306,8 @@ public class ModuleSerialConnection {
 
     public void sendCurrentParam(ParamMessage param) {
         if (modulePort != null) {
-            logger.debug("Send param " + param.id + " : " + param.value);
-            modulePort.write(PARAM_START + "100 " + param.id + ":" + Float.toString(param.value) + "\n");
+//            logger.debug("Send param " + param.id + " : " + param.value);
+            modulePort.write(PARAM_START + "100 " + param.id + ":" + param.value + "\n");
         }
     }
 
