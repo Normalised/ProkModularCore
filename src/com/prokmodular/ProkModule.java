@@ -21,7 +21,10 @@ public class ProkModule {
 
     private int firmwareVersion = 0;
     public String type;
-    public boolean hasSD = false;
+
+    public boolean hasSD() {
+        return connection.getDataValue(Messages.HAS_SD_CARD).equalsIgnoreCase("1");
+    }
 
     public int getVersion() {
         return model.getConfig().version;
@@ -125,5 +128,18 @@ public class ProkModule {
     public void selectQuad(int q) {
         logger.debug("Selected Quad " + q + " : " + connection.getDataValue(Messages.QUAD_STATE) + " : " + connection.getDataValue(Messages.QUAD_SELECT_INDEX));
 
+    }
+
+    public void readEeprom(int index) {
+        connection.sendCommand(new CommandContents(EEPROM_READ, index));
+    }
+
+    public void quickOpenSD() {
+        logger.debug("Quick Open SD");
+        connection.sendCommandWithNoData(Commands.QUICK_OPEN_SD);
+    }
+
+    public void reboot() {
+        connection.sendCommandWithNoData(Commands.REBOOT);
     }
 }
