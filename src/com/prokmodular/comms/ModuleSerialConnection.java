@@ -307,8 +307,14 @@ public class ModuleSerialConnection {
     public void sendCurrentParam(ParamMessage param) {
         if (modulePort != null) {
 //            logger.debug("Send param " + param.id + " : " + param.value);
-            modulePort.write(PARAM_START + "100 " + param.id + ":" + param.value + "\n");
+            modulePort.write(PARAM_START + Commands.INDEX_FOR_CURRENT_MODEL + " " + param.id + ":" + param.value + "\n");
         }
+    }
+
+    public void writeEeprom(int index, int data) {
+        if(data < 0) data = 0;
+        if(data > 255) data = 255;
+        modulePort.write(PARAM_START + Commands.EEPROM_WRITE_INDEX + " " + index + ":" + data + "\n");
     }
 
     public void sendCommandWithNoData(String commandName) {

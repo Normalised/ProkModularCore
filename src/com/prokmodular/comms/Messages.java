@@ -18,4 +18,5 @@ public class Messages {
 
     public static final String QUAD_STATE = "quadstate";
     public static final String QUAD_SELECT_INDEX = "quad";
+    public static final String EEPROM = "eeprom";
 }
