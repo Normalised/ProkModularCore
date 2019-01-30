@@ -104,8 +104,8 @@ public class ModuleScanner implements HandshakeStatusListener {
                 }
             }, 300, (300 * (handshakeWaitCountLimit + 1)));
         } catch (Exception e) {
-            logger.debug("Error trying port " + Serial.list()[currentPortIndex]);
-            if (currentPortIndex < Serial.list().length - 1) {
+            logger.debug("Error trying port " + portNames[currentPortIndex]);
+            if (currentPortIndex < portNames.length) {
                 currentPortIndex++;
                 testPort();
             }
