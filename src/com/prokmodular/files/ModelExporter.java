@@ -193,6 +193,7 @@ public class ModelExporter implements ModelParamListener {
         }
 
         module = currentModule;
+        modelSize = module.getSize();
         module.addParamListener(this);
     }
 }

@@ -263,6 +263,7 @@ public class ModuleSerialConnection {
             }
 
             if (command.is(Commands.SIZE)) {
+                logger.debug("Size command " + command.data + ". Listeners " + modelParamListeners.size());
                 for (ModelParamListener mpl : modelParamListeners) {
                     mpl.setModelSize(Integer.parseInt(command.data));
                 }

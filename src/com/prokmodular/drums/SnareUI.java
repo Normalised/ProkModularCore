@@ -3,6 +3,9 @@ package com.prokmodular.drums;
 import com.prokmodular.model.ModelUI;
 import com.prokmodular.ui.ModelUIBuilder;
 
+import static com.prokmodular.model.ParameterMapping.createLinear;
+import static com.prokmodular.model.ParameterMapping.createNone;
+
 public class SnareUI implements ModelUI {
     @Override
     public void createUI(ModelUIBuilder ui, int firmwareVersion, int version) {
@@ -31,7 +34,7 @@ public class SnareUI implements ModelUI {
 
         ui.addShortExpEnv("Sid Noise HPF");
 
-        ui.nextColumn();
+        ui.addSpace();
 
         ui.addMixerChannel("Sid Noise LPF");
         ui.addMixerChannel("Sid Noise HPF");
@@ -41,7 +44,7 @@ public class SnareUI implements ModelUI {
         ui.addMixerChannel("Sine A");
         ui.addMixerChannel("Sine B");
 
-        ui.addSpace();
+        ui.nextColumn();
 
         ui.addBiquad("Body", 50, 5000);
 
@@ -53,10 +56,38 @@ public class SnareUI implements ModelUI {
 
         ui.addSpace();
 
-        ui.addMixerChannel("Output Level");
+        if(version == 1) {
+            ui.addMixerChannel("Output Level");
 
-        ui.addSlider("Distort",1,100);
-        ui.addSlider("Distort2",1,100);
+            ui.addSlider("Distort",1,100);
+            ui.addSlider("Distort2",1,100);
+
+        } else {
+
+            ui.addSlider("Distort",1,100);
+            ui.addSlider("Distort2",1,100);
+
+            ui.addSpace();
+
+            ui.addSlider("Feedback A",createLinear(0,100, 0, 1));
+            ui.addSlider("Feedback B",createLinear(0,100, 0, 1));
+
+            ui.addSlider("Time A", 1,250);
+            ui.addSlider("Time B", 1,250);
+
+            ui.addMixerChannel("Delay Level A");
+            ui.addMixerChannel("Delay Level B");
+
+            ui.addSlider("Feedback Filter A Cutoff", createNone(50, 18000));
+            ui.addSlider("Feedback Filter A Res", createLinear(0, 100, 0.1f, 1.0f));
+            ui.addSlider("Feedback Filter B Cutoff", createNone(40, 4000));
+            ui.addSlider("Feedback Filter B Res", createLinear(0, 100, 0.1f, 1.0f));
+
+            ui.addSpace();
+            ui.addADEnvelope("Out Env");
+            ui.addSpace();
+            ui.addMixerChannel("Output Level");
+        }
 
     }
 }

@@ -22,6 +22,10 @@ public class ProkModule {
     private int firmwareVersion = 0;
     public String type;
 
+    public int getSize() {
+        return Integer.parseInt(connection.getDataValue(Messages.PARAM_SIZE));
+    }
+
     public boolean hasSD() {
         return connection.getDataValue(Messages.HAS_SD_CARD).equalsIgnoreCase("1");
     }

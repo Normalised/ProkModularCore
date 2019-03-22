@@ -1,6 +1,12 @@
 package com.prokmodular.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ModelConfig {
+
+    final Logger logger = LoggerFactory.getLogger(ModelConfig.class);
+
     public String filename = "";
     public String hello = "";
     public int version = 0;
@@ -25,8 +31,15 @@ public class ModelConfig {
         if(!hello.equalsIgnoreCase(config.hello)) {
             return false;
         }
-        if(config.version > version) return false;
+        if(config.version > version) {
+            logger.debug("Versions not compatible. Ours is " + version + " and other is " + config.version);
+            return false;
+        }
 
         return true;
+    }
+
+    public boolean isOlderThan(ModelConfig config) {
+        return version < config.version;
     }
 }

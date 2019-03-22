@@ -18,8 +18,6 @@ public class PresetHeaderWriter {
             writer.newLine();
             writer.write("#define Default_Params_h");
             writer.newLine();
-            writer.write("#include \"Config.h\"");
-            writer.newLine();
             writer.newLine();
             writer.write("// Default Params for " + modelName);
             writer.newLine();
@@ -35,7 +33,7 @@ public class PresetHeaderWriter {
                 modelString.add("\t{" + String.join(",", str) + "}");
             }
 
-            writer.write("float defaultParams[16][NUM_PARAMS] = {");
+            writer.write("float defaultParams[16][" + presets.get(0).size()  + "] = {");
             writer.newLine();
             writer.write(String.join(",\n", modelString));
             writer.newLine();
