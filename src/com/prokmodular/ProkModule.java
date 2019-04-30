@@ -31,7 +31,7 @@ public class ProkModule {
     }
 
     public int getVersion() {
-        return model.getConfig().version;
+        return model.getConfig().getVersion();
     }
 
     public String getFilename() {
@@ -49,12 +49,12 @@ public class ProkModule {
     }
 
     public void setConnection(ModuleSerialConnection connectionToUse, ProkModel prokModel) {
+        logger.debug("Set Connection " + prokModel.getConfig().getName() + " : " + connectionToUse.getPortName() + " : " + connectionToUse.getHandshakeStatus().toString());
         connection = connectionToUse;
         model = prokModel;
         ModelConfig config = model.getConfig();
-        config.version = Integer.parseInt(connection.getDataValue(Messages.VERSION));
+        config.setVersion(Integer.parseInt(connection.getDataValue(Messages.VERSION)));
         firmwareVersion = Integer.parseInt(connection.getDataValue(Messages.FIRMWARE_VERSION));
-
     }
 
     public boolean isConnected() {
@@ -81,12 +81,15 @@ public class ProkModule {
         connection.sendCommand(new CommandContents(Commands.SEND_PARAMS, Commands.INDEX_FOR_CURRENT_MODEL));
     }
 
+    public void getCurrentConfig() {
+        connection.sendCommand(new CommandContents(Commands.SEND_CONFIG));
+    }
     public void trigger() {
         connection.sendCommandWithNoData(Commands.TRIGGER);
     }
 
     public void clearPatches() {
-        connection.sendCommand(new CommandContents(CLEAR, ""));
+        connection.sendCommand(new CommandContents(CLEAR));
     }
 
     public void ignoreCV(boolean ignore) {
@@ -145,5 +148,9 @@ public class ProkModule {
 
     public void reboot() {
         connection.sendCommandWithNoData(Commands.REBOOT);
+    }
+
+    public void alwaysCheckSD(boolean on) {
+        connection.sendCommand(new CommandContents(Commands.ALWAYS_CHECK_SD, on ? "1" : "0"));
     }
 }

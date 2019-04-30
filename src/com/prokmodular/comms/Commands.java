@@ -22,4 +22,6 @@ public class Commands {
     public static final String QUICK_OPEN_SD = "openSD";
     public static final String REBOOT = "reboot";
     public static final String EEPROM_READ = "eeprom";
+    public static final String ALWAYS_CHECK_SD = "alwaysSD";
+    public static final String SEND_CONFIG = "sendConfig";
 }

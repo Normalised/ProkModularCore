@@ -22,6 +22,11 @@ public class CommandContents {
         data = String.valueOf(value);
     }
 
+    public CommandContents(String commandName) {
+        name = commandName;
+        data = "";
+    }
+
     public boolean is(String commandName) {
         return name.equalsIgnoreCase(commandName);
     }

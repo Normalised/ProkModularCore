@@ -2,22 +2,27 @@ package com.prokmodular.model;
 
 import com.prokmodular.files.PresetReader;
 import com.prokmodular.files.PresetWriter;
+import com.prokmodular.patches.PatchUpdater;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PresetManager {
-    private ArrayList<File> presetFiles;
+    private ArrayList<PresetFile> presetFiles;
     private ProkModel model;
     private PresetReader reader;
     private PresetWriter writer;
+
+    private PatchUpdater patchUpdater;
 
     public PresetManager() {
         presetFiles = new ArrayList<>();
 
         reader = new PresetReader();
         writer = new PresetWriter();
+
+        patchUpdater = new PatchUpdater();
     }
 
     public void setCurrentModel(ProkModel currentModel) {
@@ -26,7 +31,7 @@ public class PresetManager {
         presetFiles.clear();
     }
 
-    public List<File> listFilesFrom(File path) {
+    public List<PresetFile> listFilesFrom(File path) {
         if(model == null) return presetFiles;
 
         File[] files = path.listFiles((dir, name) -> name.toLowerCase().endsWith("prk"));
@@ -34,15 +39,20 @@ public class PresetManager {
         presetFiles.clear();
 
         for(File file : files) {
-            if(reader.modelCanReadFile(model, file)) {
-                presetFiles.add(file);
+            try {
+                Preset p = reader.readFile(file);
+                if(p.isForModel(model)) {
+                    presetFiles.add(new PresetFile(p, file));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return presetFiles;
     }
 
     public File getFileAtIndex(int index) {
-        return presetFiles.get(index);
+        return presetFiles.get(index).file;
     }
 
     public void savePreset(Preset preset, File f) {
@@ -60,8 +70,8 @@ public class PresetManager {
         } else {
             if(p.config.isOlderThan(model.getConfig())) {
                 // upgrade the preset.
-
-                return p;
+                return patchUpdater.upgradePreset(p, model.getConfig().getVersion());
+                //return p;
             } else {
                 throw new Exception("Incompatible preset");
             }

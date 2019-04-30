@@ -23,9 +23,9 @@ public class ModuleSerialConnection {
         WAITING, UNKNOWN_MODEL, FIRMWARE_MISMATCH, MODEL_MISMATCH, OK
     }
 
-    public enum HandshakeState {
-        HELLO, NAME, FIRMWARE_VERSION, MODEL_VERSION, SD_CHECK, PARAM_COUNT, CURRENT_PARAMS, QUAD_STATE, CURRENT_QUAD, COMPLETE
-    }
+//    public enum HandshakeState {
+//        HELLO, NAME, FIRMWARE_VERSION, MODEL_VERSION, SD_CHECK, PARAM_COUNT, CURRENT_PARAMS, QUAD_STATE, CURRENT_QUAD, COMPLETE
+//    }
 
     private HandshakeStatus handshakeStatus = HandshakeStatus.WAITING;
     // Make it a stack or something.
@@ -202,6 +202,9 @@ public class ModuleSerialConnection {
             String value = parts[1];
             return new CommandContents(commandName, value);
         }
+        else {
+            logger.warn("Message has wrong number of parts " + message);
+        }
         throw new Exception("Bad command format : " + message);
     }
 
@@ -222,21 +225,26 @@ public class ModuleSerialConnection {
         String[] modelAndParam = paramData.split(":");
         int modelIndex = parseInt(modelAndParam[0]);
         String[] parts = modelAndParam[1].split("=");
-        if (parts.length == 2) {
-            int paramID = parseInt(parts[0]);
-            float paramValue = parseFloat(parts[1]);
+        try {
+            if (parts.length == 2) {
+                int paramID = parseInt(parts[0]);
+                float paramValue = parseFloat(parts[1]);
 
-            ParamMessage param = new ParamMessage(paramID, paramValue);
-            if (modelIndex == 100) {
-                for (ModelParamListener mpl : modelParamListeners) {
-                    mpl.setCurrentParam(param);
+                ParamMessage param = new ParamMessage(paramID, paramValue);
+                if (modelIndex == 100) {
+                    for (ModelParamListener mpl : modelParamListeners) {
+                        mpl.setCurrentParam(param);
+                    }
+                } else {
+                    for (ModelParamListener mpl : modelParamListeners) {
+                        mpl.setParam(modelIndex, param);
+                    }
                 }
-            } else {
-                for (ModelParamListener mpl : modelParamListeners) {
-                    mpl.setParam(modelIndex, param);
-                }
+
             }
 
+        } catch (Exception e) {
+            logger.warn("Exception processing param " + paramData + ". " + e.getMessage());
         }
     }
 
@@ -293,8 +301,8 @@ public class ModuleSerialConnection {
 
         if (nextHandshakeMessage.isEmpty()) {
             handshakeStatus = HandshakeStatus.OK;
-            startKeepAlive();
             sendHandshakeComplete();
+            startKeepAlive();
         }
     }
 

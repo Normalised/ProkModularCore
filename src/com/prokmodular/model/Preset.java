@@ -16,4 +16,8 @@ public class Preset {
         params = new ArrayList<>();
         config = new ModelConfig("","");
     }
+
+    public boolean isForModel(ProkModel model) {
+        return config.getName().equalsIgnoreCase(model.getConfig().getName());
+    }
 }

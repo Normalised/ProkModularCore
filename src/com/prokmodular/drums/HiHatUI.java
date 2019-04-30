@@ -100,6 +100,13 @@ public class HiHatUI implements ModelUI {
         ui.addMixerChannel("Noise");
 
         ui.addSpace();
+        ui.addSlider("Flange Offset", createLinear(0, 100, 0, 100));
+        ui.addSlider("Flange Depth", createLinear(0, 100, 0, 100));
+        ui.addSlider("Flange Rate", createLinear(0, 100, 0, 100));
+        ui.addSlider("Flange Feedback", createLinear(0, 100, 0, 1));
+        ui.addMixerChannel("Flange Mix");
+
+        ui.addSpace();
         ui.addMixerChannel("Main Output");
 
     }

@@ -27,9 +27,9 @@ public class PresetWriter {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
-            writer.write(String.valueOf(modelConfig.version));
+            writer.write(String.valueOf(modelConfig.getVersion()));
             writer.newLine();
-            writer.write(modelConfig.hello);
+            writer.write(modelConfig.getName());
             writer.newLine();
 
             for (int i = 0; i < params.size(); i++) {

@@ -38,6 +38,11 @@ public class KickUI implements ModelUI {
 
         ui.nextColumn();
 
+        if(version > 3) {
+            ui.addSlider("Tri A Phase Mod", 0,10000);
+            ui.addSlider("Tri B Phase Mod", 0,10000);
+        }
+
         ui.addBiquad("OSC", 50, 6500);
         ui.addSlider("OSC Distort", 0, 100);
 

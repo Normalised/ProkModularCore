@@ -28,7 +28,7 @@ public class PresetReader {
             while (scan.hasNextLine()) {
                 if (state == ScannerState.VERSION) {
                     int version = Integer.parseInt(scan.nextLine());
-                    if(model.getConfig().version < version) {
+                    if(model.getConfig().getVersion() < version) {
                         return false;
                     }
                     state = ScannerState.MODEL;
@@ -60,10 +60,10 @@ public class PresetReader {
             Scanner scan = new Scanner(modelFile);
             while(scan.hasNextLine()){
                 if(state == ScannerState.VERSION) {
-                    config.version = Integer.parseInt(scan.nextLine());
+                    config.setVersion(Integer.parseInt(scan.nextLine()));
                     state = ScannerState.MODEL;
                 } else if(state == ScannerState.MODEL) {
-                    config.hello = scan.nextLine();
+                    config.setName(scan.nextLine());
                     state = ScannerState.PARAMS;
                 } else {
                     String param = scan.nextLine();

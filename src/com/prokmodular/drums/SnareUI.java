@@ -5,6 +5,7 @@ import com.prokmodular.ui.ModelUIBuilder;
 
 import static com.prokmodular.model.ParameterMapping.createLinear;
 import static com.prokmodular.model.ParameterMapping.createNone;
+import static com.prokmodular.model.ParameterMapping.createSquared;
 
 public class SnareUI implements ModelUI {
     @Override
@@ -69,19 +70,20 @@ public class SnareUI implements ModelUI {
 
             ui.addSpace();
 
-            ui.addSlider("Feedback A",createLinear(0,100, 0, 1));
-            ui.addSlider("Feedback B",createLinear(0,100, 0, 1));
+            ui.addSlider("Feedback A",createLinear(0,100, 0, 32767));
+            ui.addSlider("Feedback B",createLinear(0,100, 0, 32767));
 
-            ui.addSlider("Time A", 1,250);
-            ui.addSlider("Time B", 1,250);
+            ui.addSlider("Time A",1,200);
+            ui.addSlider("Time B", 1,200);
 
             ui.addMixerChannel("Delay Level A");
             ui.addMixerChannel("Delay Level B");
+            ui.addSpace();
 
-            ui.addSlider("Feedback Filter A Cutoff", createNone(50, 18000));
-            ui.addSlider("Feedback Filter A Res", createLinear(0, 100, 0.1f, 1.0f));
+            ui.addSlider("Feedback Filter A Cutoff", createNone(50, 10000));
+            ui.addSlider("Feedback Filter A Res", createLinear(0, 100, 0.7f, 2.0f));
             ui.addSlider("Feedback Filter B Cutoff", createNone(40, 4000));
-            ui.addSlider("Feedback Filter B Res", createLinear(0, 100, 0.1f, 1.0f));
+            ui.addSlider("Feedback Filter B Res", createLinear(0, 100, 0.7f, 2.0f));
 
             ui.addSpace();
             ui.addADEnvelope("Out Env");

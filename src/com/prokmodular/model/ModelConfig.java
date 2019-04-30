@@ -8,12 +8,16 @@ public class ModelConfig {
     final Logger logger = LoggerFactory.getLogger(ModelConfig.class);
 
     public String filename = "";
-    public String hello = "";
-    public int version = 0;
+    private String hello = "";
+    private int version = 0;
 
     public ModelConfig(String hello, String filename) {
         this.hello = hello;
         this.filename = filename;
+    }
+
+    public void setName(String name) {
+        hello = name;
     }
 
     public String getName() {
@@ -41,5 +45,14 @@ public class ModelConfig {
 
     public boolean isOlderThan(ModelConfig config) {
         return version < config.version;
+    }
+
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public int getVersion() {
+        return version;
     }
 }

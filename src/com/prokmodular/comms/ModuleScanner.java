@@ -72,9 +72,11 @@ public class ModuleScanner implements HandshakeStatusListener {
     }
 
     private void testNextPort() {
+        logger.debug("Test Next Port");
         portTestTimer.cancel();
         currentPortIndex++;
         testPort();
+        logger.debug("Test Next Port Complete");
     }
 
     private void testPort() {
@@ -178,9 +180,11 @@ public class ModuleScanner implements HandshakeStatusListener {
         List<ModuleScanStatusListener> tempListeners = new ArrayList<>(scanStatusListeners);
 
         for (ModuleScanStatusListener l : tempListeners) {
+            logger.debug("Notify Scan Complete");
             l.scanComplete(modules);
-        }
 
+        }
+        logger.debug("End Ports Checked");
     }
 
     public void register(ProkModel model) {
