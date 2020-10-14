@@ -3,35 +3,37 @@ package com.prokmodular.ui;
 import com.prokmodular.model.ParameterMapping;
 
 public interface ModelUIBuilder {
-    Object addMixerChannel(String name);
+    Object addMixerChannel(String name, int id);
 
     void addSpace();
 
-    void addStateVariable(String name, int cutoffLow, int cutoffHigh);
+    void addStateVariable(String name, int cutoffLow, int cutoffHigh, int id);
 
-    void addNoiseSampleRate();
+    void addNoiseSampleRate(int id);
 
-    Object addSlider(String name, int low, int high);
+    Object addSlider(String name, int low, int high, int id);
 
-    Object addIntSlider(String name, int low, int high);
+    Object addIntSlider(String name, int low, int high, int id);
 
-    Object addIntSlider(String name, ParameterMapping mapping);
+    Object addIntSlider(String name, ParameterMapping mapping, int id);
 
-    Object addSlider(String name, ParameterMapping mapping);
+    Object addSlider(String name, ParameterMapping mapping, int id);
 
     void nextColumn();
 
-    void addADEnvelope(String name);
+    void addADEnvelope(String name, int id);
 
-    void addBiquad(String name, int cutoffLow, int cutoffHigh);
+    void addBiquad(String name, int cutoffLow, int cutoffHigh, int id);
 
-    void addSineWithEnvelope(String name);
+    void addSineWithEnvelope(String name, int id);
 
-    void addTriModWithEnvelope(String name);
+    void addSineRatioWithEnvelope(String name, int id);
 
-    Object addTunableSlider(String name, int low, int high);
+    void addTriModWithEnvelope(String name, int id);
 
-    void addSineWithEnvelope(String name, int freqDecaySamples);
+    Object addTunableSlider(String name, int low, int high, int id);
 
-    void addShortExpEnv(String name);
+    void addSineWithEnvelope(String name, int freqDecaySamples, int id);
+
+    void addShortExpEnv(String name, int id);
 }

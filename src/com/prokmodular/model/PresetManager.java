@@ -69,11 +69,9 @@ public class PresetManager {
             return p;
         } else {
             if(p.config.isOlderThan(model.getConfig())) {
-                // upgrade the preset.
                 return patchUpdater.upgradePreset(p, model.getConfig().getVersion());
-                //return p;
             } else {
-                throw new Exception("Incompatible preset");
+                return patchUpdater.downgradePreset(p, model.getConfig().getVersion());
             }
 
         }

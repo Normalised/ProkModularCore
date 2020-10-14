@@ -288,6 +288,13 @@ public class ModuleSerialConnection {
     // PARAM_COUNT, CURRENT_PARAMS, QUAD_STATE, CURRENT_QUAD, COMPLETE
     private void processHandshake(CommandContents command) {
 
+        if(nextHandshakeMessage.isEmpty()) {
+            logger.debug("Handshake stack is empty");
+            handshakeStatus = HandshakeStatus.OK;
+            sendHandshakeComplete();
+            return;
+        }
+
         if (command.is(nextHandshakeMessage.peek())) {
             logger.debug("Got handshake message " + command.name + " : " + command.data);
             nextHandshakeMessage.pop();

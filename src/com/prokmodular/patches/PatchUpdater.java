@@ -44,7 +44,7 @@ public class PatchUpdater {
 
     public void updateDefaultParams(String modelName) throws Exception {
 
-        File definitionFolder = new File("data\\" + modelName);
+        File definitionFolder = new File("data", modelName);
         logger.debug("Drum Config Folder " + definitionFolder.getAbsolutePath());
 
         int latestVersion = getMostRecentVersion(definitionFolder);
@@ -165,7 +165,7 @@ public class PatchUpdater {
 
     private void loadModelPatchDefinitions(String modelName) throws Exception {
 
-        File definitionFolder = new File("data\\" + modelName);
+        File definitionFolder = new File("data", modelName);
 
         logger.debug("Load Model Patch definitions for " + modelName + " from " + definitionFolder.getAbsolutePath());
 
@@ -229,17 +229,12 @@ public class PatchUpdater {
     }
 
     private Preset upgradePreset(Preset preset, int newVersion, Map<Integer, PatchDefinition> patchDefinitionMap) throws Exception {
-
         // For the preset get the name of each param from the index
+        return copyPreset(preset, newVersion, patchDefinitionMap);
+    }
 
-        PatchDefinition oldPatch = patchDefinitionMap.get(preset.config.getVersion());
-        PatchDefinition latestPatch = patchDefinitionMap.get(newVersion);
-
-        Preset newPreset = new Preset();
-        newPreset.config.setVersion(newVersion);
-        newPreset.config.setName(preset.config.getName());
-
-        for(ParamDefinition param : latestPatch.params) {
+    private void copyFrom(PatchDefinition oldPatch, PatchDefinition newPatch, Preset oldPreset, Preset newPreset) throws Exception {
+        for(ParamDefinition param : newPatch.params) {
             String name = param.name;
             // get position of 'name' in old preset list
             boolean useDefault = false;
@@ -254,16 +249,40 @@ public class PatchUpdater {
             }
 
             if(useDefault) {
-                Float defaultValue = latestPatch.getDefaultValueFor(name);
+                Float defaultValue = newPatch.getDefaultValueFor(name);
                 logger.debug("Using default for " + name + " -> " + String.valueOf(defaultValue));
                 newPreset.params.add(param.index, defaultValue);
             } else if(oldParamDef != null) {
-                newPreset.params.add(param.index, preset.params.get(oldParamDef.index));
+                newPreset.params.add(param.index, oldPreset.params.get(oldParamDef.index));
             }
         }
-
-        return newPreset;
     }
 
+    public Preset downgradePreset(Preset preset, int destVersion) throws Exception {
+        logger.debug("Downgrade Preset " + preset.config.getName() + " to " + destVersion);
+        // Get patch definition map for this model type
+        if(!modelPatchDefinitionMap.containsKey(preset.config.getName())) {
+            loadModelPatchDefinitions(preset.config.getName());
+        }
+        Map<Integer, PatchDefinition> patchDefinitionMap = modelPatchDefinitionMap.get(preset.config.getName());
+        return downgradePreset(preset, destVersion, patchDefinitionMap);
+    }
 
+   private Preset downgradePreset(Preset preset, int oldVersion, Map<Integer, PatchDefinition> patchDefinitionMap) throws Exception {
+        // For the preset get the name of each param from the index
+       return copyPreset(preset, oldVersion, patchDefinitionMap);
+   }
+
+    private Preset copyPreset(Preset preset, int oldVersion, Map<Integer, PatchDefinition> patchDefinitionMap) throws Exception {
+        PatchDefinition patchDefinition = patchDefinitionMap.get(preset.config.getVersion());
+        PatchDefinition previousPatch = patchDefinitionMap.get(oldVersion);
+
+        Preset downgradedPreset = new Preset();
+        downgradedPreset.config.setVersion(oldVersion);
+        downgradedPreset.config.setName(preset.config.getName());
+
+        copyFrom(patchDefinition, previousPatch, preset, downgradedPreset);
+
+        return downgradedPreset;
+    }
 }

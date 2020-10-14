@@ -35,7 +35,7 @@ public class ModelConfig {
         if(!hello.equalsIgnoreCase(config.hello)) {
             return false;
         }
-        if(config.version > version) {
+        if(config.version != version) {
             logger.debug("Versions not compatible. Ours is " + version + " and other is " + config.version);
             return false;
         }

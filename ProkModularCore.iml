@@ -9,5 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="jssc" level="project" />
     <orderEntry type="library" exported="" name="slf4j-api-1.7.2" level="project" />
+    <orderEntry type="library" name="core" level="project" />
+    <orderEntry type="module" module-name="controlp5" exported="" />
   </component>
 </module>

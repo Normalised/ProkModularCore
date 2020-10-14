@@ -46,6 +46,10 @@ public class ModelExporter implements ModelParamListener {
 
         presetWriter = new PresetWriter();
 
+        clearModelParams();
+    }
+
+    private void clearModelParams() {
         modelParams = new ArrayList<>(16);
         for(int i=0;i<16;i++) {
             modelParams.add(i, new ArrayList<>());
@@ -55,6 +59,8 @@ public class ModelExporter implements ModelParamListener {
     public void saveLocally(ProkModel model) {
         currentModel = model;
         loadedAction = LoadedAction.SAVE_LOCALLY;
+        localModelState = LocalModelState.EMPTY;
+        clearModelParams();
         loadModels();
     }
 
@@ -62,12 +68,16 @@ public class ModelExporter implements ModelParamListener {
         currentModel = model;
         loadedAction = LoadedAction.SAVE_LOCALLY;
         folderToSaveTo = folder;
+        localModelState = LocalModelState.EMPTY;
+        clearModelParams();
         loadModels();
     }
 
     public void generateHeader(ProkModel model) {
         currentModel = model;
         loadedAction = LoadedAction.GENERATE_HEADER;
+        localModelState = LocalModelState.EMPTY;
+        clearModelParams();
         loadModels();
     }
 
